@@ -6,23 +6,23 @@ The goal of this project was to build an *MPC* with the [Stellaris Launchpad](ht
 #Usage#
 -------
 
-##Requirements for linux##
+__Requirements for linux__
     
 * [ARM EABI Toolchain Builder](https://github.com/jsnyder/arm-eabi-toolchain)
-* or [summonarm-toolchain](https://github.com/esden/summon-arm-toolchain)
+* or [summon-arm-toolchain](https://github.com/esden/summon-arm-toolchain)
 * [lm4tools](https://github.com/utzig/lm4tools)
 * [TI's StellarisWare](https://github.com/yuvadm/stellaris)
 
 
-##Building with linux##
+__Building with linux__
 
     $ cd project
     $ make
     $ make flash
 
 
-##Cloning with Stellaris Submodule##
-The StellarisWare library was included as a submodule. The libraries should not be changed or may not be needed if the depencies are already met. 
+__Cloning with Stellaris Submodule__
+The *StellarisWare* library was included as a submodule. This module may not be needed if the depencies are already met. 
 
     $ git clone https://github.com/ichpuchtli/tp2_arm.git
     $ cd tp2_arm
@@ -30,26 +30,26 @@ The StellarisWare library was included as a submodule. The libraries should not 
     $ git submodule update
 
 
-##Checking out CSS branch##
+__Checking out different branches__
 
-A separate CSS branch may be created with frequent merges onto the master branch
+A separate CSS branch may be created with frequent merges onto the master branch.
 
     $ git checkout ccsdev
     ...
-    $ git commit -m 'Debug/Fix timing issue with CCS'
+    $ git commit -m 'Debug/Fix timing issue with CCS's In-System debug'
 
 
-##Pushing changes to the github remote##
+__Pushing changes to the github remote__
 
     $ vi tp2_arm.c
     ...
     $ git commit
-    $ git push origin *branch* 
+    $ git push origin "branch* 
 
-##Pulling changes from github remote##
+__Pulling changes from the github remote__
 
-    git reset
-    git pull origin *branch*
+    $ git reset
+    $ git pull origin *branch*
 
 
 #Licence#
