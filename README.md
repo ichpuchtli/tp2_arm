@@ -54,7 +54,7 @@ A separate CSS branch may be created with frequent merges onto the master branch
 
 #Licence#
 ---------
-The submodule *stellaris* is licenced under its original terms. The code in the repo however is licenced under GPL/3.0 or later.
+The submodule *stellaris* is licenced under its original terms. The code in this repo however is licenced under GPL/3.0 or later.
 
 #Authors#
 ----------
