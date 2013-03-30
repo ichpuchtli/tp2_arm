@@ -22,6 +22,7 @@ __Building with linux__
 
 
 __Cloning with Stellaris Submodule__
+
 The *StellarisWare* library was included as a submodule. This module may not be needed if the depencies are already met. 
 
     $ git clone https://github.com/ichpuchtli/tp2_arm.git
