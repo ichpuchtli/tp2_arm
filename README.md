@@ -8,18 +8,39 @@ The goal of this project was to build an *MPC* with the [Stellaris Launchpad](ht
 
 __Requirements for linux__
     
-* [ARM EABI Toolchain Builder](https://github.com/jsnyder/arm-eabi-toolchain)
-* or [summon-arm-toolchain](https://github.com/esden/summon-arm-toolchain)
+* [ARM GCC Toolchain](https://launchpad.net/gcc-arm-embedded)
 * [lm4tools](https://github.com/utzig/lm4tools)
 * [TI's StellarisWare](https://github.com/yuvadm/stellaris)
 
+__Toolchain Installation__
+  
+The arm gcc toolchain provided above is precompiled, simply unpack it and add it to your path.
 
-__Building with linux__
+    cd ~/bin
+    tar -xvf gcc-arm-none-eabi...tar.bz2
+    echo "export PATH=$PATH:~/bin/gcc-arm-none-eabi/bin" >> ~/.zshrc
+
+*lm4tools* provides the flash programmer.
+    
+    git clone https://github.com/utzig/lm4tools
+    cd lm4tools/lm4flash
+    make
+    chmod +x lm4flash
+    sudo cp lm4flash /usr/bin
+
+*StellarisWare* includes all the libraies and utilities provided by TI.
+
+    git clone https://github.com/yuvadm/stellaris
+    cd stellaris/boards/ek-lm4f120xl/project0
+    ...
+    make
+    lm4flash
+
+__Building project with linux__
 
     $ cd project
     $ make
     $ make flash
-
 
 __Cloning with Stellaris Submodule__
 
