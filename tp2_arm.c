@@ -11,6 +11,9 @@
 #include "driverlib/interrupt.h" // IntEnable, IntPrioritySet,...
 #include "driverlib/timer.h" // TimerConfigure, TimerLoadSet,...
 
+// Bottome Half Proccesing
+#include "taskq.h"
+
 #define DACSPI_FREQ 44100 // 44.1 kHz
 
 void vSPIDACInit(void);
@@ -38,6 +41,13 @@ const unsigned long sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   3057, 3013, 2969, 2924, 2878, 2832, 2785, 2738, 2690, 2643, 2594, 2546,
   2497, 2448, 2398, 2349, 2299, 2249, 2199, 2148, 2098};
 
+void task_shell(void* data){
+
+    int arg = (int) data;
+
+    // do something time consuming
+}
+
 int main(void) {
 
     //
@@ -52,6 +62,8 @@ int main(void) {
 
     while(1)
     {
+        vTaskQRun();
+        SysCtlDelay(100);
     }
 
 }
