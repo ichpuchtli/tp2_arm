@@ -46,6 +46,8 @@ ${COMPILER}:
 # Rules for building.
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/${PROJECT}.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/taskq.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/uartcomm.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/spidac.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld

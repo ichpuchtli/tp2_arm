@@ -3,9 +3,6 @@
 #include "driverlib/sysctl.h" // SYSCTL_*
 #include "driverlib/gpio.h" // GPIOPinConfigure,GPIO_PIN_3,....
 
-// DAC SPI
-#include "driverlib/ssi.h" // SSIDataPut,SSIBusy,...
-
 //Timer Interrupts
 #include "inc/hw_ints.h" // NVIC interrupt assignment macros
 #include "driverlib/interrupt.h" // IntEnable, IntPrioritySet,...
@@ -14,13 +11,18 @@
 // Bottome Half Proccesing
 #include "taskq.h"
 
-#define DACSPI_FREQ 44100 // 44.1 kHz
+// uint8_t, size_t, bool, etc...
+#include "stdtypes.h"
 
-void vSPIDACInit(void);
-void vSPIDACWrite(unsigned long usData);
-void vSPIDACUpdateRoutine(void);
+// vSPIDACInit, vSPIDACWrite, vSPIDACUpdateRoutine
+#include "spidac.h"
 
-const unsigned long sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
+#include "uartcomm.h"
+
+#define DELAY_MS_(MS) SysCtlDelay(SysCtlClockGet()/(1000 * MS * 3))
+#define DELAY_US_(US) SysCtlDelay(SysCtlClockGet()/(US * 3))
+
+const uint16_t sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   1747, 1698, 1648, 1599, 1550, 1502, 1453, 1406, 1358, 1311, 1264, 1218,
   1172, 1127, 1083, 1039, 995, 952, 910, 869, 828, 788, 749, 710, 673, 636,
   600, 565, 531, 497, 465, 433, 403, 374, 345, 318, 291, 266, 242, 219, 197,
@@ -41,12 +43,6 @@ const unsigned long sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   3057, 3013, 2969, 2924, 2878, 2832, 2785, 2738, 2690, 2643, 2594, 2546,
   2497, 2448, 2398, 2349, 2299, 2249, 2199, 2148, 2098};
 
-void task_shell(void* data){
-
-    int arg = (int) data;
-
-    // do something time consuming
-}
 
 int main(void) {
 
@@ -57,95 +53,19 @@ int main(void) {
                     SYSCTL_OSC_MAIN);
 
     vSPIDACInit();
+    vUARTCommInit();
 
     IntMasterEnable(); // avr sei() equivalent
+
+
+    vUARTCommSendByte('\n');
+    vUARTCommSendStream("\r\n", 2);
+    vUARTCommSendString("Hello World!\r\n");
 
     while(1)
     {
         vTaskQRun();
-        SysCtlDelay(100);
+        SysCtlDelay(1000);
     }
-
-}
-
-
-void vSPIDACInit(void){
-
-    /******************************************************************************/
-    // SPI Interface Configuration
-
-    // Enable Peripheral Bus
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-
-    // Connect Pin Functionality GPIOPinConfigure(GPIO_PA5_SSI0TX);
-    GPIOPinConfigure(GPIO_PA3_SSI0FSS);
-    GPIOPinConfigure(GPIO_PA2_SSI0CLK);
-
-    //Configure Pins for use by SSI Peripheral Bus
-    GPIOPinTypeSSI(GPIO_PORTA_BASE, GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_5 );
-  
-    SSIConfigSetExpClk(SSI0_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
-            SSI_MODE_MASTER, SysCtlClockGet()/2, 16);
-
-    SSIEnable(SSI0_BASE);
-
-    /******************************************************************************/
-    //Timer/Interrupt Configuration
-
-    // Calculate timer period from DACSPI_FREQ
-    unsigned long ulPeriod = SysCtlClockGet() / DACSPI_FREQ - 1;
-
-    // Configure Timer
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
-    TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER0_BASE, TIMER_A, ulPeriod);
-
-    // Configure Interrupt
-    IntEnable(INT_TIMER0A);
-    TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-    // Start Timer!
-    TimerEnable(TIMER0_BASE, TIMER_A);
-
-}
-
-void vSPIDACWrite(unsigned long usData){
-
- /*
-  * bit 15 A/B: DACa or DACb Selection Bit
-  *  1 = Write to DACb
-  *  0 = Write to DACa
-  * 
-  *  bit 14 BUF: Vref Input Buffer Control Bit
-  *  1 = Buffered
-  *  0 = Unbuffered
-  * 
-  *  bit 13 GA: Output Gain Selection Bit
-  *  1 = 1x(Vout = Vref * D/4096)
-  *  1 = 2x(Vout = 2 * Vref * D/4096)
-  * 
-  *  bit 12 ~SHDN: Output Shutdown Control Bit
-  *  1 = Active Moder Operation Vout is available
-  *  0 = Shutdown the selected DAC channel
-  *
-  */
-  unsigned long usCommand = (0 << 15) | (0 << 14) | (1 << 13) | (1 << 12);
-
-  SSIDataPut(SSI0_BASE, usCommand | (usData & 4095) );
-
-  while(SSIBusy(SSI0_BASE)) continue;
-
-}
-
-// DAC Update Interrupt Handler
-// Occurs every 1/DACSPI_FREQ seconds
-void vSPIDACUpdateRoutine(void){
-
-    static unsigned long i = 0;
-
-    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-    
-    vSPIDACWrite(sinetable[i++ & 255]);
 
 }
