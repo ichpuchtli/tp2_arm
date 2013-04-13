@@ -29,12 +29,12 @@
 #include "diskio.h"
 #include "ff.h"
 #include "driverlib/rom.h"
-#include "SDcard/sd.h"
+#include "sd.h"
 #include "usblib/usblib.h"
 
-#include "USB/usb.h"
-#include "USB/usbStructs.h"
-#include "wav/processWav.h"
+#include "usb.h"
+#include "usbStructs.h"
+#include "processWav.h"
 //*****************************************************************************
 //
 // Define pin to LED color mapping.

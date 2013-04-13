@@ -117,7 +117,5 @@ void sd_create(void)
 	// Enable the SPI
 	SSIEnable(SSI0_BASE);
 
-
-
 	f_mount(0, &fatSystem);
 }
