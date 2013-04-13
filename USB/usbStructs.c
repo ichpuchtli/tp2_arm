@@ -181,7 +181,7 @@ const tUSBDMSCDevice g_sMSCDevice =
         USBDMSCStorageWrite,
         USBDMSCStorageNumBlocks
     },
-    massStorageEventCallback,
+    USBDMSCEventCallback,
     &g_sMSCInstance
 };
 

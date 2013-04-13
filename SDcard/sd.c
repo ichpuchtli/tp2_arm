@@ -5,8 +5,11 @@
 #include "inc/hw_memmap.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
+#include "diskio.h"
 #include "ff.h"
 #include "driverlib/rom.h"
+#include "sd.h"
+#include "driverlib/ssi.h"
 
 
 //-----------------------------------------------------------------------------
@@ -17,7 +20,7 @@ static FIL fileSystem;
 char readBuff[4097];
 
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // sd_read
 //
 // Reads a given number of bytes from a given file and places it into
@@ -28,7 +31,7 @@ char readBuff[4097];
 // size: THe number of bytes to be read from the file.
 //
 // return: The bytes read from the file.
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 char *sd_read(char *fileName, WORD size)
 {
 	WORD br;
@@ -41,6 +44,28 @@ char *sd_read(char *fileName, WORD size)
 	return readBuff;
 }
 
+
+//------------------------------------------------------------------------------
+// sd_ReadWav
+//
+// Opens a wav file a reads from a specific (given location).
+//
+// fileName: The name of the file to be read.
+// size: The amount of data to be read.
+// location: The location to begin reading from.
+//------------------------------------------------------------------------------
+char *sd_ReadWav(char* fileName, WORD size, DWORD location)
+{
+	WORD br;
+
+	f_open(&fileSystem, fileName, FA_READ);
+	f_lseek(&fileSystem, location);
+	f_read(&fileSystem, readBuff, size, &br);
+	f_close(&fileSystem);
+	readBuff[size] = '\0';
+
+	return readBuff;
+}
 
 //----------------------------------------------------------------------------
 // sd_write
@@ -57,6 +82,7 @@ void sd_write(char *fileName, char *data, WORD size){
 
     f_open(&fileSystem, fileName, FA_CREATE_ALWAYS | FA_WRITE);
     f_write(&fileSystem, data, size, &bw);
+
     // Close the file so the data is flushed onto the SD card
     f_close(&fileSystem);
 }
