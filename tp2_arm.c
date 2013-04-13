@@ -19,6 +19,17 @@
 
 #include "uartcomm.h"
 
+// jakes stuff
+#include "usb.h"
+#include "diskio.h"
+
+#include "ff.h"
+#include "driverlib/rom.h"
+#include "sd.h"
+#include "usblib/usblib.h"
+#include "usbStructs.h"
+#include "processWav.h"
+
 #define DELAY_MS_(MS) SysCtlDelay(SysCtlClockGet()/(1000 * MS * 3))
 #define DELAY_US_(US) SysCtlDelay(SysCtlClockGet()/(US * 3))
 
@@ -55,6 +66,10 @@ int main(void) {
     vSPIDACInit();
     vUARTCommInit();
 
+    ROM_SysTickPeriodSet(ROM_SysCtlClockGet() / 100);
+    ROM_SysTickEnable();
+    ROM_SysTickIntEnable();
+
     IntMasterEnable(); // avr sei() equivalent
 
 
@@ -62,10 +77,18 @@ int main(void) {
     vUARTCommSendStream("\r\n", 2);
     vUARTCommSendString("Hello World!\r\n");
 
+/*
+    sd_create();
+//    sd_write("ok.txt", "bounce", 6);
+//    char *tempBuff;
+//    tempBuff = sd_ReadWav("jake.txt", 17, 67);
+//    sd_write("new.txt", tempBuff, 17);
+    USB_Create();
+    processWav_GetWavInfo("test.wav");
+*/
+
     while(1)
     {
         vTaskQRun();
         SysCtlDelay(1000);
     }
-
-}
