@@ -10,7 +10,7 @@ __Requirements for linux__
 * [lm4tools](https://github.com/utzig/lm4tools)
 * [TI's StellarisWare](https://github.com/yuvadm/stellaris)
 
-__Toolchain Installation__
+__Toolchain Installation__  
 The *ARM GCC Toolchain* provided above is precompiled, simply unpack it and add it to your path.
 
     cd ~/bin

@@ -19,12 +19,14 @@
 
 #include "uartcomm.h"
 
-// jakes stuff
-#include "usb.h"
-#include "diskio.h"
+#include "systickctrl.h"
 
-#include "ff.h"
-#include "driverlib/rom.h"
+// jakes stuff
+#include "usbmsctrl.h"
+#include "fatfs/src/diskio.h"
+
+#include "fatfs/src/ff.h"
+
 #include "sd.h"
 #include "usblib/usblib.h"
 #include "usbStructs.h"
@@ -57,18 +59,16 @@ const uint16_t sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
 
 int main(void) {
 
-    //
     // Setup the system clock to run at 50 Mhz from PLL with crystal reference
-    //
     SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
                     SYSCTL_OSC_MAIN);
 
     vSPIDACInit();
     vUARTCommInit();
 
-    ROM_SysTickPeriodSet(ROM_SysCtlClockGet() / 100);
-    ROM_SysTickEnable();
-    ROM_SysTickIntEnable();
+    /* Initialize the SysTick interrupt with given period */
+    vSysTickCtrlInit(100 /*ms*/);
+
 
     IntMasterEnable(); // avr sei() equivalent
 
@@ -89,6 +89,12 @@ int main(void) {
 
     while(1)
     {
-        vTaskQRun();
+        // if ( bTaskQTaskPending() )
+            vTaskQRun();
+        //else
+        //  SysCtlSleep()
+
         SysCtlDelay(1000);
     }
+}
+

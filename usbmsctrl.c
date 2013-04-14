@@ -1,6 +1,4 @@
-#include "usb.h"
-
-
+#include "usbmsctrl.h"
 
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
@@ -12,14 +10,14 @@
 #include "driverlib/rom.h"
 #include "driverlib/systick.h"
 #include "driverlib/udma.h"
-#include "grlib/grlib.h"
+//#include "grlib/grlib.h"
 //#include "usblib/usblib.h"
 #include "usblib/usb-ids.h"
 #include "usblib/device/usbdevice.h"
 #include "usblib/device/usbdmsc.h"
 #include "usbStructs.h"
 //#include "usb_msc_structs.h"
-#include "third_party/fatfs/src/diskio.h"
+#include "fatfs/src/diskio.h"
 //#include "drivers/cfal96x64x16.h"
 
 #define RED_LED   GPIO_PIN_1
