@@ -1,6 +1,18 @@
 # Defines project name
 PROJECT=tp2_arm
 
+# Defines project objects
+TP2_ARM_OBJECTS=${COMPILER}/${PROJECT}.o
+TP2_ARM_OBJECTS+=${COMPILER}/taskq.o
+TP2_ARM_OBJECTS+=${COMPILER}/uartcomm.o
+TP2_ARM_OBJECTS+=${COMPILER}/spidac.o
+TP2_ARM_OBJECTS+=${COMPILER}/systickctrl.o
+TP2_ARM_OBJECTS+=${COMPILER}/usbmsctrl.o
+TP2_ARM_OBJECTS+=${COMPILER}/sd.o
+TP2_ARM_OBJECTS+=${COMPILER}/rgbledctrl.o
+TP2_ARM_OBJECTS+=${COMPILER}/ledmatrix.o
+TP2_ARM_OBJECTS+=${COMPILER}/startup_${COMPILER}.o
+
 # Defines the part type that this project uses.
 PART=LM4F120H5QR
 
@@ -36,7 +48,7 @@ clean:
 
 # The rule to clean out all the build products.
 size:
-	@arm-none-eabi-size ${COMPILER}/${PROJECT}.axf
+	@arm-none-eabi-size -t ${TP2_ARM_OBJECTS}
 
 
 # The rule to create the target directory.
@@ -44,13 +56,10 @@ ${COMPILER}:
 	@mkdir -p ${COMPILER}
 
 # Rules for building.
-${COMPILER}/${PROJECT}.axf: ${COMPILER}/${PROJECT}.o
-${COMPILER}/${PROJECT}.axf: ${COMPILER}/taskq.o
-${COMPILER}/${PROJECT}.axf: ${COMPILER}/uartcomm.o
-${COMPILER}/${PROJECT}.axf: ${COMPILER}/spidac.o
-${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
-${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
+${COMPILER}/${PROJECT}.axf: ${TP2_ARM_OBJECTS}
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld
+${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
+
 SCATTERgcc_${PROJECT}=${PROJECT}.ld
 ENTRY_${PROJECT}=ResetISR
 CFLAGSgcc=-DTARGET_IS_BLIZZARD_RA2

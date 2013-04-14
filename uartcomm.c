@@ -9,7 +9,7 @@
 
 #include "uartcomm.h"
 
-size_t ulStringLen(const uint8_t* pucString){
+size_t ulStringLen(int8_t* pucString){
 
   size_t size = 0;
 
@@ -19,18 +19,18 @@ size_t ulStringLen(const uint8_t* pucString){
 
 }
 
-void vUARTCommSendByte(const uint8_t ucByte){
+void vUARTCommSendByte(int8_t ucByte){
 
   UARTCharPutNonBlocking(UART0_BASE, ucByte);
 }
 
-void vUARTCommSendStream(const uint8_t* pucBuffer, size_t ulCount){
+void vUARTCommSendStream(int8_t* pucBuffer, size_t ulCount){
 
   while(ulCount--) 
     vUARTCommSendByte(*pucBuffer++);
 }
 
-void vUARTCommSendString(const uint8_t* pucString){
+void vUARTCommSendString(int8_t* pucString){
 
   vUARTCommSendStream(pucString, ulStringLen(pucString));
 }

@@ -1,15 +1,14 @@
 #include "taskq.h"
+
 #include "inc/hw_types.h" // tBoolean type
 #include "driverlib/interrupt.h"
 
-/* Circular Buffer Macro's taken from linux headers include/linux/circ_buf.h */
-#define CIRC_COUNT(head,tail,size) (((head) - (tail)) & ((size)-1))
-#define CIRC_SPACE(head,tail,size) CIRC_COUNT((tail),((head)+1),(size))
+#include "circ_buf.h"
 
 struct task_t {
 
-  func_t func;
-  void*  data;
+  func_t fFunc;
+  void*  vpData;
 };
 
 struct tqueue_t {
@@ -23,14 +22,14 @@ struct tqueue_t {
 /* Static Initialization C99 only */
 struct tqueue_t tTaskQ = {.w_off = 0xFFFFFFFF, .r_off = 0xFFFFFFFF};
 
-/* Internal Functions */
+/* Internal fFunctions */
 /******************************************************************************/
-static void vAddtoBack(struct tqueue_t* queue, func_t func, void* data); 
+static void vAddtoBack(struct tqueue_t* queue, func_t fFunc, void* vpData); 
 static inline void vRemoveFront(struct tqueue_t* queue);
 static inline void vInitQueue(struct tqueue_t* queue);
 static inline struct task_t* tpGetFront(struct tqueue_t* queue);
 
-static void vAddtoBack(struct tqueue_t* queue, func_t func, void* data){ 
+static void vAddtoBack(struct tqueue_t* queue, func_t fFunc, void* vpData){ 
 
   struct task_t* task = (struct task_t*) 0x0;
 
@@ -39,8 +38,8 @@ static void vAddtoBack(struct tqueue_t* queue, func_t func, void* data){
 
     task = (struct task_t*)(queue->start + queue->w_off);
     
-    task->func = func;
-    task->data = data;
+    task->fFunc = fFunc;
+    task->vpData = vpData;
 
     /* Advance write offset */
     queue->w_off = (queue->w_off + 1) & (TASKQSIZE - 1);
@@ -49,7 +48,7 @@ static void vAddtoBack(struct tqueue_t* queue, func_t func, void* data){
 
 static inline void vRemoveFront(struct tqueue_t* queue){
 
-    if(CIRC_COUNT(queue->w_off, queue->r_off, TASKQSIZE) > 0){
+    if(CIRC_CNT(queue->w_off, queue->r_off, TASKQSIZE) > 0){
 
         /* Advance read offset */
         queue->r_off = (queue->r_off + 1) & (TASKQSIZE - 1);
@@ -59,7 +58,7 @@ static inline void vRemoveFront(struct tqueue_t* queue){
 
 static inline struct task_t* tpGetFront(struct tqueue_t* queue){
 
-    if(CIRC_COUNT(queue->w_off, queue->r_off, TASKQSIZE) > 0){
+    if(CIRC_CNT(queue->w_off, queue->r_off, TASKQSIZE) > 0){
 
         return (struct task_t*)(queue->start + queue->r_off);
     }
@@ -72,19 +71,19 @@ static inline void vInitQueue(struct tqueue_t* queue){
     queue->w_off = queue->r_off = 0;
 }
 
-/* Public Function's */
+/* Public fFunction's */
 /******************************************************************************/
 void vTaskQReset(void){
 
     vInitQueue(&tTaskQ);
 }
 
-void vTaskQAppend(func_t func, void* data){
+void vTaskQAppend(func_t fFunc, void* vpData){
 
     if((tTaskQ.w_off & tTaskQ.r_off) == 0xFFFFFFFF) 
         vInitQueue(&tTaskQ);
 
-    vAddtoBack(&tTaskQ, func, data);
+    vAddtoBack(&tTaskQ, fFunc, vpData);
 
 }
 
@@ -95,11 +94,11 @@ void vTaskQRun(void){
 
     if(front){
 
-        task.func = front->func;
-        task.data = front->data;
+        task.fFunc = front->fFunc;
+        task.vpData = front->vpData;
         vRemoveFront(&tTaskQ);
 
-        if(task.func) (*task.func)(task.data);
+        if(task.fFunc) (*task.fFunc)(task.vpData);
     }
 
 }
