@@ -3,6 +3,8 @@
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
 
+#include "uartcomm.h"
+
 #define RED_LED   GPIO_PIN_1
 #define BLUE_LED  GPIO_PIN_2
 #define GREEN_LED GPIO_PIN_3
@@ -22,39 +24,16 @@ main(void)
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED);
 
+    vUARTCommSendByte('\r');
+    vUARTCommSendByte('\n');
+    vUARTCommSendString("Hello World!\r\n");
+    vUARTCommSendByte('\r');
+    vUARTCommSendByte('\n');
+
     //
     // Loop Forever
     //
     while(1)
     {
-        //
-        // Turn on the LED
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, RED_LED);
-
-        //
-        // Delay for a bit
-        //
-        SysCtlDelay(80000);
-
-        //
-        // Turn on the LED
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, BLUE_LED);
-
-        //
-        // Delay for a bit
-        //
-        SysCtlDelay(80000);
-
-        //
-        // Turn on the LED
-        //
-        GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, GREEN_LED);
-
-        //
-        // Delay for a bit
-        //
-        SysCtlDelay(80000);
     }
 }
