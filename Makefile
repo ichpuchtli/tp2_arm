@@ -63,6 +63,7 @@ ${COMPILER}:
 # Rules for building.
 #
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/${PROJECT}.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/keypad.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld
