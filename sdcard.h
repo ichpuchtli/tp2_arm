@@ -5,11 +5,8 @@
 #include "fatfs/src/ff.h"
 #include "stdtypes.h"
 
-static FATFS xFileSystem;
 
-static FIL xOpenFiles[4];
-
-void vSDCardInit(void);
+void vSDCardInit(void); 
 
 void vOpenWavFile(uint8_t num);
 size_t vReadWavFile(uint8_t num, uint16_t* buffer, size_t count);

@@ -8,8 +8,10 @@
 #include "driverlib/ssi.h"
 
 #include "sdcard.h"
+
+static FATFS xFatFileSystem;
 // Initialises the SD card using SSI0, with a clock of 1MHz. Note: must use
-//
+
 // SSI0, otherwise fatfs drivers must be changed.
 //----------------------------------------------------------------------------
 void vSDCardInit(void){
@@ -36,16 +38,8 @@ void vSDCardInit(void){
     // Enable the SPI
     SSIEnable(SSI0_BASE);
 
-    f_mount(0, &xFileSystem);
+    f_mount(0, &xFatFileSystem);
 }
-
-void vSDCardOpen(FIL* file, char* filename, uint32_t position, uint8_t mode){ }
-
-void vSDCardClose(FIL* file){ }
-
-uint32_t vSDCardRead(FIL* file, char* buffer, uint32_t position, uint32_t count){ }
-
-uint32_t vSDCardWrite(FIL* file, char* buffer, uint32_t position, uint32_t count){ }
 
 void vOpenWavFile(uint8_t num){}
 size_t vReadWavFile(uint8_t num, uint16_t* buffer, size_t count){}
