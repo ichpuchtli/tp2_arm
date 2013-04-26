@@ -10,6 +10,6 @@ void vSPIDACInit(void);
 void vSPIDACWrite(uint16_t usData);
 
 /* User defined DAC update routine */
-extern void vSPIDACUpdateEvent(void);
+extern void vSPIDACUpdate_Event(void);
 
 #endif
