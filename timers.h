@@ -18,5 +18,4 @@ void vTimer1Enable(void);
 /* These must be implemented by the user */
 extern void vTimer0_Event(void);
 extern void vTimer1_Event(void);
-
 #endif
