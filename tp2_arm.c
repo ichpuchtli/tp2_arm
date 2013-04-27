@@ -2,6 +2,7 @@
 #include "inc/hw_memmap.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/gpio.h"
+#include "utils/uartstdio.h"
 
 #include "uartcomm.h"
 
@@ -24,16 +25,21 @@ main(void)
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED);
 
+
+    vUARTCommInit();
+    vUARTCommMapStdio();
+
+    /* Asynchronous Method */
     vUARTCommSendByte('\r');
     vUARTCommSendByte('\n');
     vUARTCommSendString("Hello World!\r\n");
-    vUARTCommSendByte('\r');
-    vUARTCommSendByte('\n');
 
-    //
-    // Loop Forever
-    //
+
     while(1)
     {
+      UARTprintf("\r\nHello World!\r\n");
+
+      SysCtlDelay(100000);
     }
+
 }

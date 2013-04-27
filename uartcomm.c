@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "inc/hw_types.h" // tBoolean type
 #include "inc/hw_memmap.h"
 #include "inc/hw_ints.h"
@@ -6,13 +8,14 @@
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/pin_map.h"
+#include "utils/uartstdio.h"
 
 #include "uartcomm.h"
 
 size_t ulStringLen(int8_t* pucString){
 
   size_t size = 0;
-
+  
   while(*pucString++) size++;
 
   return size;
@@ -48,11 +51,20 @@ void vUARTCommInit(void){
   /* Configure UART0 Operation */
   UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet(), UARTCOMM_BAUDRATE, UARTCOMM_OPTIONS);
 
+}
+
+void vUARTCommEnableInterrupts(void){
+
   /* Enable UART Interrupts */
   UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
   IntEnable(INT_UART0);
   UARTIntEnable(UART0_BASE, UART_INT_RX);
 
+}
+
+void vUARTCommMapStdio(void){
+
+  UARTStdioConfig(0, UARTCOMM_BAUDRATE, SysCtlClockGet()); 
 }
 
 void vUARTCommCLIIntHandler(void){}
