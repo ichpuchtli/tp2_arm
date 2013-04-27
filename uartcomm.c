@@ -12,7 +12,7 @@
 
 #include "uartcomm.h"
 
-size_t ulStringLen(int8_t* pucString){
+size_t ulStringLen(char* pucString){
 
   size_t size = 0;
   
@@ -22,18 +22,18 @@ size_t ulStringLen(int8_t* pucString){
 
 }
 
-void vUARTCommSendByte(int8_t ucByte){
+void vUARTCommSendByte(char ucByte){
 
   UARTCharPutNonBlocking(UART0_BASE, ucByte);
 }
 
-void vUARTCommSendStream(int8_t* pucBuffer, size_t ulCount){
+void vUARTCommSendStream(char* pucBuffer, size_t ulCount){
 
   while(ulCount--) 
     vUARTCommSendByte(*pucBuffer++);
 }
 
-void vUARTCommSendString(int8_t* pucString){
+void vUARTCommSendString(char* pucString){
 
   vUARTCommSendStream(pucString, ulStringLen(pucString));
 }
@@ -67,8 +67,19 @@ void vUARTCommMapStdio(void){
   UARTStdioConfig(0, UARTCOMM_BAUDRATE, SysCtlClockGet()); 
 }
 
-void vUARTCommCLIIntHandler(void){}
-void vUARTCommRouterIntHandler(void){}
+void vUARTCommIntHandler(void){
+
+    uint32_t ulStatus;
+
+    /* Get the interrrupt status. */
+    ulStatus = UARTIntStatus(UART0_BASE, true);
+
+    /* Clear the asserted interrupts. */
+    UARTIntClear(UART0_BASE, ulStatus);
+
+    (void) vUARTCommInt_Event();
+
+}
 
 void vUARTCommEchoIntHandler(void){
 

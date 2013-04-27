@@ -43,3 +43,5 @@ main(void)
     }
 
 }
+
+void vUARTCommInt_Event(void){}

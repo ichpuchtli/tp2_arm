@@ -40,7 +40,8 @@ static void IntDefaultHandler(void);
 // Forward declaration of the external interrupt handlers.
 //
 //*****************************************************************************
-extern void vUARTCommEchoIntHandler(void);
+extern void vSysTick_Event(void);
+extern void vUARTCommIntHandler(void);
 
 //*****************************************************************************
 //
@@ -81,13 +82,13 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
-    IntDefaultHandler,                      // The SysTick handler
+    IntDefaultHandler,                         // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
-    vUARTCommEchoIntHandler,                // UART0 Rx and Tx
+    vUARTCommIntHandler,                    // UART0 Rx and Tx
     IntDefaultHandler,                      // UART1 Rx and Tx
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
