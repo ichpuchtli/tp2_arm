@@ -6,6 +6,7 @@
 #include "driverlib/gpio.h"
 #include "driverlib/rom.h"
 #include "driverlib/ssi.h"
+#include "utils/uartstdio.h"
 
 #include "sdcard.h"
 

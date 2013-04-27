@@ -44,6 +44,9 @@ main(void)
     ROM_SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
                     SYSCTL_OSC_MAIN);
 
+    vUARTCommInit();
+    vUARTCommMapStdio();
+    UARTprintf("0:Initialize Stdio\r\n");
 
     ROM_SysTickPeriodSet((ROM_SysCtlClockGet()) / 100);
     ROM_SysTickEnable();
@@ -54,33 +57,39 @@ main(void)
     ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED);
     ROM_GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, RED_LED);
 
-    vUARTCommInit();
-    vUARTCommMapStdio();
-
     vSPIDACInit();
+
+    UARTprintf("1:Initialize DAC\r\n");
 
     vSDCardInit();
 
+    UARTprintf("2:Initialize SD\r\n");
+
     ROM_IntMasterEnable();
+
+    UARTprintf("3:Master Int Enable\r\n");
 
     FIL xFile; 
 
     WORD word;
 
     f_open(&xFile, "test.txt", FA_CREATE_ALWAYS | FA_WRITE);
-    f_write(&xFile, "hello\r\n", 7, &word);
+    UARTprintf("4: Opened test.txt\n");
+
+    f_write(&xFile, "Hello World!\r\n", 14, &word);
+    UARTprintf("5: Wrote Hello World to test.txt\n");
+
     f_close(&xFile);
+    UARTprintf("6: Closed test.txt\n");
 
     UARTprintf("\r\nHello World!\r\n");
 
-    /* Asynchronous Method */
-    vUARTCommSendByte('\r');
-    vUARTCommSendByte('\n');
-    vUARTCommSendString("Hello World!\r\n");
-
     GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, GREEN_LED);
 
-    while ( 1 ) { }
+    while ( 1 ) { 
+
+      ROM_SysCtlDelay(1000000);
+    }
 }
 
 /* DAC Update Routine called within the vSPIDACIntHanlder() */
