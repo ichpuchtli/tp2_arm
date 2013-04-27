@@ -8,6 +8,10 @@
 
 #include "sdcard.h"
 
+#include "utils/uartstdio.h"
+
+#include "uartcomm.h"
+
 #define RED_LED   GPIO_PIN_1
 #define BLUE_LED  GPIO_PIN_2
 #define GREEN_LED GPIO_PIN_3
@@ -50,7 +54,10 @@ main(void)
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED);
     GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, RED_LED);
 
-    //vSPIDACInit();
+    vUARTCommInit();
+    vUARTCommMapStdio();
+
+    vSPIDACInit();
 
     vSDCardInit();
 
@@ -63,6 +70,13 @@ main(void)
     f_open(&xFile, "test.txt", FA_CREATE_ALWAYS | FA_WRITE);
     f_write(&xFile, "hello\r\n", 7, &word);
     f_close(&xFile);
+
+    UARTprintf("\r\nHello World!\r\n");
+
+    /* Asynchronous Method */
+    vUARTCommSendByte('\r');
+    vUARTCommSendByte('\n');
+    vUARTCommSendString("Hello World!\r\n");
 
     GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, GREEN_LED);
 

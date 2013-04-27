@@ -67,6 +67,7 @@ ${COMPILER}/${PROJECT}.axf: ${COMPILER}/spidac.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/fatfs/src/ff.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/fatfs/port/mmc-ek-lm4f232h5qd.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/sdcard.o
+${COMPILER}/${PROJECT}.axf: ${ROOT}/utils/uartstdio.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld

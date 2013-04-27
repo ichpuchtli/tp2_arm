@@ -35,8 +35,14 @@ static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 
-extern void vSPIDACIntHandler(void);
-extern void SysTickHanlder(void);
+//*****************************************************************************
+//
+// Forward declaration of the external interrupt handlers.
+//
+//*****************************************************************************
+extern void SysTickHandler(void);
+extern void vUARTCommIntHandler(void);
+
 //*****************************************************************************
 //
 // The entry point for the application.
@@ -49,7 +55,7 @@ extern int main(void);
 // Reserve space for the system stack.
 //
 //*****************************************************************************
-static unsigned long pulStack[256];
+static unsigned long pulStack[64];
 
 //*****************************************************************************
 //
@@ -76,13 +82,13 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
-    SysTickHanlder,                      // The SysTick handler
+    SysTickHandler,                         // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
     IntDefaultHandler,                      // GPIO Port E
-    IntDefaultHandler,                      // UART0 Rx and Tx
+    vUARTCommIntHandler,                    // UART0 Rx and Tx
     IntDefaultHandler,                      // UART1 Rx and Tx
     IntDefaultHandler,                      // SSI0 Rx and Tx
     IntDefaultHandler,                      // I2C0 Master and Slave
@@ -96,7 +102,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    vSPIDACIntHandler,                      // Timer 0 subtimer A
+    IntDefaultHandler,                   // Timer 0 subtimer A
     IntDefaultHandler,                      // Timer 0 subtimer B
     IntDefaultHandler,                      // Timer 1 subtimer A
     IntDefaultHandler,                      // Timer 1 subtimer B
@@ -341,3 +347,4 @@ IntDefaultHandler(void)
     {
     }
 }
+>>>>>>> uartcomm
