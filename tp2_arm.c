@@ -41,7 +41,7 @@ int
 main(void)
 {
     // Setup the system clock to run at 50 Mhz from PLL with crystal reference
-    SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
+    ROM_SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
                     SYSCTL_OSC_MAIN);
 
 
@@ -50,9 +50,9 @@ main(void)
     ROM_SysTickIntEnable();
 
     // Enable and configure the GPIO port for the LED operation.
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED);
-    GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, RED_LED);
+    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    ROM_GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED);
+    ROM_GPIOPinWrite(GPIO_PORTF_BASE, RED_LED|BLUE_LED|GREEN_LED, RED_LED);
 
     vUARTCommInit();
     vUARTCommMapStdio();
@@ -91,8 +91,14 @@ void vSPIDACUpdate_Event(void){
     vSPIDACWrite(sinetable[ulIndex++ & 255]);
 }
 
-void SysTickHanlder(void){
+void vSysTick_Event(void){
 
   // Call the Fatfs tick timer.
   disk_timerproc();
+}
+
+void vUARTCommInt_Event(void){
+
+  // do nothing
+
 }

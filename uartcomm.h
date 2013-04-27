@@ -8,18 +8,16 @@
 #define UARTCOMM_OPTIONS  (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE)
 
 /* Interrupt Handlers */
-void vUARTCommEchoIntHandler(void);
-void vUARTCommCLIIntHanlder(void);
-void vUARTCommRouterIntHandler(void);
+extern void vUARTCommInt_Event(void);
 
-void vUARTCommSendByte(int8_t cByte);
-void vUARTCommSendStream(int8_t* pcBuffer, size_t ulCount);
-void vUARTCommSendString(int8_t* pcString);
+void vUARTCommSendByte(char cByte);
+void vUARTCommSendStream(char* pcBuffer, size_t ulCount);
+void vUARTCommSendString(char* pcString);
 
 void vUARTCommInit(void);
 void vUARTCommEnableInterrupts(void);
 void vUARTCommMapStdio(void);
 
-size_t ulCommStringLen(int8_t* pcString);
+size_t ulCommStringLen(char* pcString);
 
 #endif

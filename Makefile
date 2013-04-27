@@ -64,6 +64,7 @@ ${COMPILER}:
 #
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/${PROJECT}.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/spidac.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/uartcomm.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/fatfs/src/ff.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/fatfs/port/mmc-ek-lm4f232h5qd.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/sdcard.o

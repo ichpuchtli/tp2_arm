@@ -1,7 +1,8 @@
 #ifndef _SPI_DAC_H_
 #define _SPI_DAC_H_
 
-#include "stdtypes.h"
+#include "stddef.h"
+#include "stdint.h"
 
 #define DACSPI_FREQ 44100 // 44.1 kHz
 

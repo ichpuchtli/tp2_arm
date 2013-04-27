@@ -3,7 +3,9 @@
 
 #include "fatfs/src/diskio.h"
 #include "fatfs/src/ff.h"
-#include "stdtypes.h"
+
+#include "stddef.h"
+#include "stdint.h"
 
 
 void vSDCardInit(void); 

@@ -10,8 +10,8 @@
 #include "sdcard.h"
 
 static FATFS xFatFileSystem;
-// Initialises the SD card using SSI0, with a clock of 1MHz. Note: must use
 
+// Initialises the SD card using SSI0, with a clock of 1MHz. Note: must use
 // SSI0, otherwise fatfs drivers must be changed.
 //----------------------------------------------------------------------------
 void vSDCardInit(void){
