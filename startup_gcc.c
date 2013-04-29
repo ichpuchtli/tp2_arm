@@ -53,6 +53,8 @@ extern void vTimers4BIntHandler(void);
 extern void vTimers5AIntHandler(void);
 extern void vTimers5BIntHandler(void);
 
+extern void vSysTick_Event(void);
+
 //*****************************************************************************
 //
 // The entry point for the application.
@@ -92,7 +94,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
-    IntDefaultHandler,                      // The SysTick handler
+    vSysTick_Event,                         // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
@@ -112,12 +114,12 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    vTimers0AIntHandler,                      // Timer 0 subtimer A
-    vTimers0BIntHandler,                      // Timer 0 subtimer B
-    vTimers1AIntHandler,                      // Timer 1 subtimer A
-    vTimers1BIntHandler,                      // Timer 1 subtimer B
-    vTimers2AIntHandler,                      // Timer 2 subtimer A
-    vTimers2BIntHandler,                      // Timer 2 subtimer B
+    vTimers0AIntHandler,                    // Timer 0 subtimer A
+    vTimers0BIntHandler,                    // Timer 0 subtimer B
+    vTimers1AIntHandler,                    // Timer 1 subtimer A
+    vTimers1BIntHandler,                    // Timer 1 subtimer B
+    vTimers2AIntHandler,                    // Timer 2 subtimer A
+    vTimers2BIntHandler,                    // Timer 2 subtimer B
     IntDefaultHandler,                      // Analog Comparator 0
     IntDefaultHandler,                      // Analog Comparator 1
     IntDefaultHandler,                      // Analog Comparator 2
@@ -291,8 +293,7 @@ ResetISR(void)
     // enabled).  Any configuration of the floating-point unit using DriverLib
     // APIs must be done here prior to the floating-point unit being enabled.
     //
-    // Note that this does not use DriverLib since it might not be included in
-    // this project.
+    // Note that this does not use DriverLib since it might not be included in // this project.
     //
     HWREG(NVIC_CPAC) = ((HWREG(NVIC_CPAC) &
                          ~(NVIC_CPAC_CP10_M | NVIC_CPAC_CP11_M)) |
