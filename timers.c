@@ -1,7 +1,6 @@
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "driverlib/debug.h"
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/pin_map.h"
@@ -11,252 +10,337 @@
 
 #include "timers.h"
 
-//*****************************************************************************
-//
-// The error routine that is called if the driver library encounters an error.
-//
-//*****************************************************************************
-#ifdef DEBUG
-void
-__error__(char *pcFilename, unsigned long ulLine)
-{
-}
-#endif
+#define SEQ_TIMERS_SIZE 12 
+
+enum SEQ_TIMER_ENUM {
+
+    TIMERS_SUBTIMER0A,
+    TIMERS_SUBTIMER0B,
+    TIMERS_SUBTIMER1A,
+    TIMERS_SUBTIMER1B,
+    TIMERS_SUBTIMER2A,
+    TIMERS_SUBTIMER2B,
+    TIMERS_SUBTIMER3A,
+    TIMERS_SUBTIMER3B,
+    TIMERS_SUBTIMER4A,
+    TIMERS_SUBTIMER4B,
+    TIMERS_SUBTIMER5A,
+    TIMERS_SUBTIMER5B,
+
+};
+
+// Timer0A,Timer0B,Timer1A...etc
+// For possible event hooks for any single timer interrupt
+void (*xEventHookMatrix[SEQ_TIMERS_SIZE])(void) = {0};
 
 
-void vTimer0IntInit(uint32_t ulPeriodus){
+void vTimersSetPeriod(uint32_t ulBase, uint32_t ulTimer, uint32_t ulPeriodus){
 
-    //
-    // Enable the peripherals used by this example.
-    //
-    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
-
-    //
-    // Configure the two 32-bit periodic timers.
-    //
-    ROM_TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-    ROM_TimerLoadSet(TIMER0_BASE, TIMER_A, ROM_SysCtlClockGet() / 1000000 * ulPeriodus);
-
-    //
-    // Setup the interrupts for the timer timeouts.
-    //
-    ROM_IntEnable(INT_TIMER0A);
-    ROM_TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-
-    //
-    // Enable the timers.
-    //
-    ROM_TimerEnable(TIMER0_BASE, TIMER_A);
+    ROM_TimerLoadSet(ulBase, ulTimer, ROM_SysCtlClockGet() / 1000000 * ulPeriodus);
 }
 
-void vTimer1IntInit(uint32_t ulPeriodus){
+void vTimersDisable(uint32_t ulBase, uint32_t ulTimer){
 
-    //
-    // Enable the peripherals used by this example.
-    //
-    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);
+    ROM_TimerDisable(ulBase, ulTimer);
+}
+
+void vTimersEnable(uint32_t ulBase, uint32_t ulTimer){
+
+    ROM_TimerEnable(ulBase, ulTimer);
+}
+
+void vTimersFullWidthOneShot(uint32_t ulBase, uint32_t ulPeriodus){
+
+    switch(ulBase){
+        case TIMER0_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+        case TIMER1_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);
+        case TIMER2_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);
+        case TIMER3_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3);
+        case TIMER4_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER4);
+        case TIMER5_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER5);
+    }
+
+    ROM_TimerConfigure(ulBase, TIMER_CFG_ONE_SHOT);
+
+    vTimersSetPeriod(ulBase, TIMER_BOTH, ulPeriodus);
+
+    switch(ulBase){
+        case TIMER0_BASE: ROM_IntEnable(INT_TIMER0A);
+        case TIMER1_BASE: ROM_IntEnable(INT_TIMER1A);
+        case TIMER2_BASE: ROM_IntEnable(INT_TIMER2A);
+        case TIMER3_BASE: ROM_IntEnable(INT_TIMER3A);
+        case TIMER4_BASE: ROM_IntEnable(INT_TIMER4A);
+        case TIMER5_BASE: ROM_IntEnable(INT_TIMER5A);
+    }
+
+    ROM_TimerIntEnable(ulBase, TIMER_TIMA_TIMEOUT);
+}
+
+void vTimersSplitOneShot(uint32_t ulBase, uint32_t ulTimer, uint32_t ulPeriodus){
+
+    switch(ulBase){
+        case TIMER0_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0); break;
+        case TIMER1_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1); break;
+        case TIMER2_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2); break;
+        case TIMER3_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3); break;
+        case TIMER4_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER4); break;
+        case TIMER5_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER5); break;
+    }
+
+    if(ulTimer & TIMER_A)
+        ROM_TimerConfigure(ulBase, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_ONE_SHOT);
+
+    if(ulTimer & TIMER_B)
+        ROM_TimerConfigure(ulBase, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_B_ONE_SHOT);
+
+    vTimersSetPeriod(ulBase, ulTimer, ulPeriodus);
+
+    if(ulTimer & TIMER_A){
+        switch(ulBase){
+            case TIMER0_BASE: ROM_IntEnable(INT_TIMER0A); break;
+            case TIMER1_BASE: ROM_IntEnable(INT_TIMER1A); break;
+            case TIMER2_BASE: ROM_IntEnable(INT_TIMER2A); break;
+            case TIMER3_BASE: ROM_IntEnable(INT_TIMER3A); break;
+            case TIMER4_BASE: ROM_IntEnable(INT_TIMER4A); break;
+            case TIMER5_BASE: ROM_IntEnable(INT_TIMER5A); break;
+        }
+    }
 
 
-    //
-    // Configure the two 32-bit periodic timers.
-    //
-    ROM_TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    ROM_TimerLoadSet(TIMER1_BASE, TIMER_A, ROM_SysCtlClockGet() / 1000000 * ulPeriodus);
+    if(ulTimer & TIMER_B){
+        switch(ulBase){
+            case TIMER0_BASE: ROM_IntEnable(INT_TIMER0B); break;
+            case TIMER1_BASE: ROM_IntEnable(INT_TIMER1B); break;
+            case TIMER2_BASE: ROM_IntEnable(INT_TIMER2B); break;
+            case TIMER3_BASE: ROM_IntEnable(INT_TIMER3B); break;
+            case TIMER4_BASE: ROM_IntEnable(INT_TIMER4B); break;
+            case TIMER5_BASE: ROM_IntEnable(INT_TIMER5B); break;
+        }
+    }
 
-    //
-    // Setup the interrupts for the timer timeouts.
-    //
-    ROM_IntEnable(INT_TIMER1A);
-    ROM_TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
+    if(ulTimer & TIMER_A)
+        ROM_TimerIntEnable(ulBase, TIMER_TIMA_TIMEOUT);
 
-    //
-    // Enable the timers.
-    //
-    ROM_TimerEnable(TIMER1_BASE, TIMER_A);
+    if(ulTimer & TIMER_B)
+        ROM_TimerIntEnable(ulBase, TIMER_TIMB_TIMEOUT);
+
+}
+
+void vTimersFullWidthPeriodic(uint32_t ulBase, uint32_t ulPeriodus){
+
+    switch(ulBase){
+        case TIMER0_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+        case TIMER1_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);
+        case TIMER2_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);
+        case TIMER3_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3);
+        case TIMER4_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER4);
+        case TIMER5_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER5);
+    }
+
+    ROM_TimerConfigure(ulBase, TIMER_CFG_PERIODIC);
+
+    vTimersSetPeriod(ulBase, TIMER_BOTH, ulPeriodus);
+
+    switch(ulBase){
+        case TIMER0_BASE: ROM_IntEnable(INT_TIMER0A);
+        case TIMER1_BASE: ROM_IntEnable(INT_TIMER1A);
+        case TIMER2_BASE: ROM_IntEnable(INT_TIMER2A);
+        case TIMER3_BASE: ROM_IntEnable(INT_TIMER3A);
+        case TIMER4_BASE: ROM_IntEnable(INT_TIMER4A);
+        case TIMER5_BASE: ROM_IntEnable(INT_TIMER5A);
+    }
+
+    ROM_TimerIntEnable(ulBase, TIMER_TIMA_TIMEOUT);
+
+}
+
+void vTimersSplitPeriodic(uint32_t ulBase, uint32_t ulTimer, uint32_t ulPeriodus){
+
+    switch(ulBase){
+        case TIMER0_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0); break;
+        case TIMER1_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1); break;
+        case TIMER2_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2); break;
+        case TIMER3_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3); break;
+        case TIMER4_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER4); break;
+        case TIMER5_BASE: ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER5); break;
+    }
+
+    // TODO: ERROR these statements overwrites existing configuration
+    if(ulTimer & TIMER_A)
+        ROM_TimerConfigure(ulBase, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_PERIODIC);
+
+    if(ulTimer & TIMER_B)
+        ROM_TimerConfigure(ulBase, TIMER_CFG_SPLIT_PAIR | TIMER_CFG_B_PERIODIC);
+
+    vTimersSetPeriod(ulBase, ulTimer, ulPeriodus);
+
+    if(ulTimer & TIMER_A){
+        switch(ulBase){
+            case TIMER0_BASE: ROM_IntEnable(INT_TIMER0A); break;
+            case TIMER1_BASE: ROM_IntEnable(INT_TIMER1A); break;
+            case TIMER2_BASE: ROM_IntEnable(INT_TIMER2A); break;
+            case TIMER3_BASE: ROM_IntEnable(INT_TIMER3A); break;
+            case TIMER4_BASE: ROM_IntEnable(INT_TIMER4A); break;
+            case TIMER5_BASE: ROM_IntEnable(INT_TIMER5A); break;
+        }
+    }
+
+    if(ulTimer & TIMER_B){
+        switch(ulBase){
+            case TIMER0_BASE: ROM_IntEnable(INT_TIMER0B); break;
+            case TIMER1_BASE: ROM_IntEnable(INT_TIMER1B); break;
+            case TIMER2_BASE: ROM_IntEnable(INT_TIMER2B); break;
+            case TIMER3_BASE: ROM_IntEnable(INT_TIMER3B); break;
+            case TIMER4_BASE: ROM_IntEnable(INT_TIMER4B); break;
+            case TIMER5_BASE: ROM_IntEnable(INT_TIMER5B); break;
+        }
+    }
+
+    if(ulTimer & TIMER_A)
+        ROM_TimerIntEnable(ulBase, TIMER_TIMA_TIMEOUT);
+
+    if(ulTimer & TIMER_B)
+        ROM_TimerIntEnable(ulBase, TIMER_TIMB_TIMEOUT);
 
 }
 
 
-//////////////////////////////////////////////////////////////////////////////
-// One Shot Setups
-//////////////////////////////////////////////////////////////////////////////
-void vTimer2AStartOneShot(uint32_t ulPeriodus){
+// Register Timer Interrupt Handlers
+void vTimersAddEventHook(uint32_t ulBase, uint32_t ulTimer, void (*func)(void)){
 
-    //
-    // Enable the peripherals used by this example.
-    //
-    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);
+    uint8_t ucBaseTimerNum = 0x0;
 
-    //
-    // Configure the two 32-bit periodic timers.
-    //
-    ROM_TimerConfigure(TIMER2_BASE, TIMER_CFG_16_BIT_PAIR | TIMER_CFG_A_ONE_SHOT);
+    switch(ulBase){
 
-    //
-    // Setup the interrupts for the timer timeouts.
-    //
-    ROM_TimerIntEnable(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
+        case TIMER0_BASE: ucBaseTimerNum = 0; break;
+        case TIMER1_BASE: ucBaseTimerNum = 1; break;
+        case TIMER2_BASE: ucBaseTimerNum = 2; break;
+        case TIMER3_BASE: ucBaseTimerNum = 3; break;
+        case TIMER4_BASE: ucBaseTimerNum = 4; break;
+        case TIMER5_BASE: ucBaseTimerNum = 5; break;
+    }
 
-    vTimer2ASetPeriod(ulPeriodus);
+    if( ulTimer & TIMER_A )
+        xEventHookMatrix[2*ucBaseTimerNum] = func;
 
-    vTimer2AEnable();
+    if( ulTimer & TIMER_B )
+        xEventHookMatrix[2*ucBaseTimerNum+1] = func;
 }
 
-void vTimer2BOneShot(uint32_t ulPeriodus){
+void vTimersRemoveEventHooks(uint32_t ulBase, uint32_t ulTimer){
 
-    //
-    // Enable the peripherals used by this example.
-    //
-    ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);
+    uint8_t ucBaseTimerNum = 0x0;
 
-    //
-    // Configure the two 32-bit periodic timers.
-    //
-    ROM_TimerConfigure(TIMER2_BASE, TIMER_CFG_16_BIT_PAIR | TIMER_CFG_B_ONE_SHOT);
+    switch(ulBase){
 
-    ROM_IntPriority(INT_TIMER2B, 0x20); // Lower Priority
-    ROM_IntEnable(INT_TEMER2B);
+        case TIMER0_BASE: ucBaseTimerNum = 0; break;
+        case TIMER1_BASE: ucBaseTimerNum = 1; break;
+        case TIMER2_BASE: ucBaseTimerNum = 2; break;
+        case TIMER3_BASE: ucBaseTimerNum = 3; break;
+        case TIMER4_BASE: ucBaseTimerNum = 4; break;
+        case TIMER5_BASE: ucBaseTimerNum = 5; break;
+    }
 
-    //
-    // Setup the interrupts for the timer timeouts.
-    //
-    ROM_TimerIntEnable(TIMER2_BASE, TIMER_TIMB_TIMOUT);
+    if( ulTimer & TIMER_A )
+        xEventHookMatrix[2*ucBaseTimerNum] = (void (*)(void)) 0x0;
 
-    vTimer2BSetPeriod(ulPeriodus);
+    if( ulTimer & TIMER_B )
+        xEventHookMatrix[2*ucBaseTimerNum+1] = (void (*)(void)) 0x0;
 
-    vTimer2BEnable();
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Period Setters
-//////////////////////////////////////////////////////////////////////////////
-void vTimer2ASetPeriod(uint32_t ulPeriodus){
+void vTimersInt_Event(uint8_t timer){
 
-    ROM_TimerLoadSet(TIMER2_BASE, TIMER_A, ROM_SysCtlClockGet() / 1000000 * ulPeriodus);
-}
+    void (*func)(void) = xEventHookMatrix[timer];
 
-void vTimer2BSetPeriod(uint32_t ulPeriodus){
-
-    ROM_TimerLoadSet(TIMER2_BASE, TIMER_B, ROM_SysCtlClockGet() / 1000000 * ulPeriodus);
+    if(func) (*func)();
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Interrupt Handlers
 //////////////////////////////////////////////////////////////////////////////
 
-void vTimer2ADisable(void){
-    
-    ROM_TimerDisable(TIMER2_BASE, TIMER_A);
-}
-
-void vTimer2BDisable(void){
-
-    ROM_TimerDisable(TIMER2_BASE, TIMER_B);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Interrupt Handlers
-//////////////////////////////////////////////////////////////////////////////
-
-void vTimer2AEnable(void){
-
-    ROM_TimerEnable(TIMER2_BASE, TIMER_A);
-}
-
-void vTimer2BEnable(void){
-
-    ROM_TimerEnable(TIMER2_BASE, TIMER_B);
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// Interrupt Handlers
-//////////////////////////////////////////////////////////////////////////////
-
-void Timer0AIntHandler(void) {
+void vTimers0AIntHandler(void){
 
     ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
 
-    (void) vTimer0A_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER0A);
 }
 
-void Timer0BIntHandler(void) {
+void vTimers0BIntHandler(void){
 
     ROM_TimerIntClear(TIMER0_BASE, TIMER_TIMB_TIMEOUT);
 
-    (void) vTimer0B_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER0B);
 }
 
-//////////////////////////////////////////////////////////////////////////////
 
-void Timer1AIntHandler(void) {
+void vTimers1AIntHandler(void){
 
     ROM_TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    (void) vTimer1A_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER1A);
 }
 
-void Timer1BIntHandler(void) {
+void vTimers1BIntHandler(void){
 
     ROM_TimerIntClear(TIMER1_BASE, TIMER_TIMB_TIMEOUT);
 
-    (void) vTimer1B_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER1B);
 }
-//////////////////////////////////////////////////////////////////////////////
 
-void Timer2AIntHandler(void) {
+void vTimers2AIntHandler(void){
 
     ROM_TimerIntClear(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
 
-    (void) vTimer2A_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER2A);
 }
-void Timer2BIntHandler(void) {
+
+void vTimers2BIntHandler(void){
 
     ROM_TimerIntClear(TIMER2_BASE, TIMER_TIMB_TIMEOUT);
 
-    (void) vTimer2B_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER2B);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
-void Timer3AIntHandler(void) {
+void vTimers3AIntHandler(void){
 
     ROM_TimerIntClear(TIMER3_BASE, TIMER_TIMA_TIMEOUT);
 
-    (void) vTimer3A_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER3A);
 }
 
-void Timer3BIntHandler(void) {
+void vTimers3BIntHandler(void){
 
     ROM_TimerIntClear(TIMER3_BASE, TIMER_TIMB_TIMEOUT);
 
-    (void) vTimer3B_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER3B);
 }
-//////////////////////////////////////////////////////////////////////////////
 
-void Timer4AIntHandler(void) {
+void vTimers4AIntHandler(void){
 
     ROM_TimerIntClear(TIMER4_BASE, TIMER_TIMA_TIMEOUT);
 
-    (void) vTimer4A_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER4A);
 }
-void Timer4BIntHandler(void) {
+
+void vTimers4BIntHandler(void){
 
     ROM_TimerIntClear(TIMER4_BASE, TIMER_TIMB_TIMEOUT);
 
-    (void) vTimer4B_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER4B);
 }
-//////////////////////////////////////////////////////////////////////////////
 
-void Timer5AIntHandler(void) {
+void vTimers5AIntHandler(void){
 
     ROM_TimerIntClear(TIMER5_BASE, TIMER_TIMA_TIMEOUT);
 
-    (void) vTimer5A_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER5A);
 }
-void Timer5BIntHandler(void) {
+
+void vTimers5BIntHandler(void){
 
     ROM_TimerIntClear(TIMER5_BASE, TIMER_TIMB_TIMEOUT);
 
-    (void) vTimer5B_Event();
+    vTimersInt_Event(TIMERS_SUBTIMER5B);
 }

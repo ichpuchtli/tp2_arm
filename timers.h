@@ -1,21 +1,27 @@
 #ifndef _TIMERS_H_
 #define _TIMERS_H_
 
-#include "stdtypes.h"
+#include "stdint.h"
 
-void vTimer0IntInit(uint32_t ulPeriodus);
-void vTimer1IntInit(uint32_t ulPeriodus);
+// TODO Wide Timer Support
+// NOTE Split Timers with 80MHz Main Clock have maximum period of 819 uSeconds
+// NOTE Full Width Timers with 80MHz Main Clock have maximum period of 53 000 000 uSeconds
+// NOTE higher prescalers can produce longer periods but with less resolution
 
-void vTimer0SetPeriod(uint32_t ulPeriodus);
-void vTimer1SetPeriod(uint32_t ulPeriodus);
+void vTimersSetPeriod(uint32_t ulBase, uint32_t ulTimer, uint32_t ulPeriodus);
+void vTimersDisable(uint32_t ulBase, uint32_t ulTimer);
+void vTimersEnable(uint32_t ulBase, uint32_t ulTimer);
 
-void vTimer0Disable(void);
-void vTimer1Disable(void);
+void vTimersFullWidthOneShot(uint32_t ulBase, uint32_t ulPeriodus);
 
-void vTimer0Enable(void);
-void vTimer1Enable(void);
+void vTimersSplitOneShot(uint32_t ulBase, uint32_t ulTimer, uint32_t ulPeriodus);
 
-/* These must be implemented by the user */
-extern void vTimer0_Event(void);
-extern void vTimer1_Event(void);
+void vTimersFullWidthPeriodic(uint32_t ulBase, uint32_t ulPeriodus);
+
+void vTimersSplitPeriodic(uint32_t ulBase, uint32_t ulTimer, uint32_t ulPeriodus);
+
+// Register Timer Interrupt Handlers
+void vTimersAddEventHook(uint32_t ulBase, uint32_t ulTimer, void (*func)(void));
+void vTimersRemoveEventHooks(uint32_t ulBase, uint32_t ulTimer);
+
 #endif
