@@ -40,8 +40,18 @@ static void IntDefaultHandler(void);
 // External declarations for the interrupt handlers used by the application.
 //
 //*****************************************************************************
-extern void Timer0IntHandler(void);
-extern void Timer1IntHandler(void);
+extern void vTimers0AIntHandler(void);
+extern void vTimers0BIntHandler(void);
+extern void vTimers1AIntHandler(void);
+extern void vTimers1BIntHandler(void);
+extern void vTimers2AIntHandler(void);
+extern void vTimers2BIntHandler(void);
+extern void vTimers3AIntHandler(void);
+extern void vTimers3BIntHandler(void);
+extern void vTimers4AIntHandler(void);
+extern void vTimers4BIntHandler(void);
+extern void vTimers5AIntHandler(void);
+extern void vTimers5BIntHandler(void);
 
 //*****************************************************************************
 //
@@ -102,12 +112,12 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    vTimer0AIntHandler,                      // Timer 0 subtimer A
-    vTimer0BIntHandler,                      // Timer 0 subtimer B
-    vTimer1AIntHandler,                      // Timer 1 subtimer A
-    vTimer1BIntHandler,                      // Timer 1 subtimer B
-    vTimer2AIntHandler,                      // Timer 2 subtimer A
-    vTimer2BIntHandler,                      // Timer 2 subtimer B
+    vTimers0AIntHandler,                      // Timer 0 subtimer A
+    vTimers0BIntHandler,                      // Timer 0 subtimer B
+    vTimers1AIntHandler,                      // Timer 1 subtimer A
+    vTimers1BIntHandler,                      // Timer 1 subtimer B
+    vTimers2AIntHandler,                      // Timer 2 subtimer A
+    vTimers2BIntHandler,                      // Timer 2 subtimer B
     IntDefaultHandler,                      // Analog Comparator 0
     IntDefaultHandler,                      // Analog Comparator 1
     IntDefaultHandler,                      // Analog Comparator 2
@@ -118,8 +128,8 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port H
     IntDefaultHandler,                      // UART2 Rx and Tx
     IntDefaultHandler,                      // SSI1 Rx and Tx
-    vTimer3AIntHandler,                      // Timer 3 subtimer A
-    vTimer3BIntHandler,                      // Timer 3 subtimer B
+    vTimers3AIntHandler,                      // Timer 3 subtimer A
+    vTimers3BIntHandler,                      // Timer 3 subtimer B
     IntDefaultHandler,                      // I2C1 Master and Slave
     IntDefaultHandler,                      // Quadrature Encoder 1
     IntDefaultHandler,                      // CAN0
@@ -153,8 +163,8 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     IntDefaultHandler,                      // I2C2 Master and Slave
     IntDefaultHandler,                      // I2C3 Master and Slave
-    vTimer4AIntHandler,                      // Timer 4 subtimer A
-    vTimer4BIntHandler,                      // Timer 4 subtimer B
+    vTimers4AIntHandler,                      // Timer 4 subtimer A
+    vTimers4BIntHandler,                      // Timer 4 subtimer B
     0,                                      // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
@@ -175,8 +185,8 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
-    vTimer5AIntHandler,                      // Timer 5 subtimer A
-    vTimer5BIntHandler,                      // Timer 5 subtimer B
+    vTimers5AIntHandler,                      // Timer 5 subtimer A
+    vTimers5BIntHandler,                      // Timer 5 subtimer B
     IntDefaultHandler,                      // Wide Timer 0 subtimer A
     IntDefaultHandler,                      // Wide Timer 0 subtimer B
     IntDefaultHandler,                      // Wide Timer 1 subtimer A
