@@ -80,7 +80,7 @@ void inline vLEDMatrixClearPixelN(uint8_t ucNum){
     g_pxLEDMatrix[ucNum].blue = 0;
 }
 
-void vLEDMatrixIntHanlder(void){
+void vLEDMatrixMultiplexer_Event(void){
 
     static volatile uint8_t ucPosition = 0x0;
 
@@ -90,6 +90,7 @@ void vLEDMatrixIntHanlder(void){
 
     ucPosition = (ucPosition + 1) & (LEDMATRIX_AREA - 1);
 }
+
 void inline vLEDMatrixSetPixel(uint8_t ucX, uint8_t ucY, uint8_t* pucRGB){
 
     vLEDMatrixSetPixelN(ucX + LEDMATRIX_SIZEY*ucY, pucRGB);

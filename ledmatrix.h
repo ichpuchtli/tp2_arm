@@ -14,7 +14,7 @@ struct rgb24_t {
 };
 
 void vLEDMatrixInit(void);
-void vLEDMatrixIntHanlder(void);
+void vLEDMatrixMultiplexer_Event(void);
 
 /* Left to Right From Bottom
  *
