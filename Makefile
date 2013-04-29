@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #
 # Defines project name
 #
@@ -73,6 +74,7 @@ ${COMPILER}/${PROJECT}.axf: ${COMPILER}/spidac.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/utils/uartstdio.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/uartcomm.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/sdcard.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/keypad.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld
