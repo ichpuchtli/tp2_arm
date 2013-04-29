@@ -1,7 +1,7 @@
 #ifndef _EVENTQ_H_
 #define _EVENTQ_H_
 
-#include "stdtypes.h"
+#include "stdint.h"
 
 #define EVENTQSIZE 32
 

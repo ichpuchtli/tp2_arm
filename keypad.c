@@ -56,7 +56,7 @@ void vKeyPadInit(void){
 
 }
 
-void vKeyPadRotateRowSelection(void){
+void vKeyPadRotateRowSelection_Hook(void){
 
     g_ucRowPosition = (g_ucRowPosition + 1) * (NUM_ROWS - 1);
 }

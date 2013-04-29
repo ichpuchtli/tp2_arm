@@ -9,12 +9,11 @@
 
 #include "timers.h"
 #include "talloc.h"
-
 #include "spidac.h"
-
 #include "sdcard.h"
-
 #include "uartcomm.h"
+#include "ledmatrix.h"
+#include "keypad.h"
 
 const uint16_t sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   1747, 1698, 1648, 1599, 1550, 1502, 1453, 1406, 1358, 1311, 1264, 1218,
@@ -37,52 +36,10 @@ const uint16_t sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   3057, 3013, 2969, 2924, 2878, 2832, 2785, 2738, 2690, 2643, 2594, 2546,
   2497, 2448, 2398, 2349, 2299, 2249, 2199, 2148, 2098};
 
-int
-main(void)
-{
-    // Setup the system clock to run at 50 Mhz from PLL with crystal reference
-    ROM_SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
-                    SYSCTL_OSC_MAIN);
 
-    vUARTCommInit();
-    vUARTCommMapStdio();
-    UARTprintf("0:Initialize Stdio\r\n");
+void vKeyPadPress_Event(uint32_t ulPin){
 
-    ROM_SysTickPeriodSet((ROM_SysCtlClockGet()) / 100);
-    ROM_SysTickEnable();
-    ROM_SysTickIntEnable();
 
-    vSPIDACInit();
-
-    UARTprintf("1:Initialize DAC\r\n");
-
-    vSDCardInit();
-
-    UARTprintf("2:Initialize SD\r\n");
-
-    ROM_IntMasterEnable();
-
-    UARTprintf("3:Master Int Enable\r\n");
-
-    FIL xFile; 
-
-    WORD word;
-
-    f_open(&xFile, "test.txt", FA_CREATE_ALWAYS | FA_WRITE);
-    UARTprintf("4: Opened test.txt\n");
-
-    f_write(&xFile, "Hello World!\r\n", 14, &word);
-    UARTprintf("5: Wrote Hello World to test.txt\n");
-
-    f_close(&xFile);
-    UARTprintf("6: Closed test.txt\n");
-
-    UARTprintf("\r\nHello World!\r\n");
-
-    while ( 1 ) { 
-
-      ROM_SysCtlDelay(1000000);
-    }
 }
 
 /* DAC Update Routine called within the vSPIDACIntHanlder() */
@@ -99,8 +56,88 @@ void vSysTick_Event(void){
   disk_timerproc();
 }
 
-void vUARTCommInt_Event(void){
+int main(void) {
 
-  // do nothing
+    // Setup the system clock to run at 50 Mhz from PLL with crystal reference
+    ROM_SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
+                    SYSCTL_OSC_MAIN);
 
+    vUARTCommInit();
+    vUARTCommMapStdio();
+
+    ROM_SysTickPeriodSet((ROM_SysCtlClockGet()) / 100);
+    ROM_SysTickEnable();
+    ROM_SysTickIntEnable();
+
+    if( cTallocReserveTimer(TIMER2_BASE, TIMER_A) ){
+
+        vSPIDACInit();
+
+        vTimersSplitPeriodic(TIMER2_BASE, TIMER_A, 1000000 / SPIDAC_FREQ);
+
+        vTimersAddEventHook(TIMER2_BASE, TIMER_A, &vSPIDACUpdate_Event);
+
+        vTimersEnable(TIMER2_BASE, TIMER_A);
+
+        UARTprintf("OK: DAC using TIMER2A\r\n");
+
+    }else{
+        UARTprintf("Error: Timer2A already reserved\r\n");
+    }
+
+
+    if( cTallocReserveTimer(TIMER2_BASE, TIMER_B) ){
+
+        vKeyPadInit();
+
+        vTimersSplitPeriodic(TIMER2_BASE, TIMER_B, 500);
+
+        vTimersAddEventHook(TIMER2_BASE, TIMER_A, &vKeyPadRotateRowSelection_Hook);
+
+        vTimersEnable(TIMER2_BASE, TIMER_A);
+
+        UARTprintf("OK: KeyPad using TIMER2B\r\n");
+
+    }else {
+        UARTprintf("Error: Timer2B already reserved\r\n");
+    }
+
+
+    if( cTallocReserveTimer(TIMER3_BASE, TIMER_BOTH) ){
+
+        vLEDMatrixInit();
+
+        vTimersFullWidthPeriodic(TIMER3_BASE, 1000000/(LEDMATRIX_AREA * 30));
+
+        vTimersAddEventHook(TIMER3_BASE, TIMER_A, &vLEDMatrixMultiplexer_Hook);
+
+        vTimersEnable(TIMER3_BASE, TIMER_A);
+
+        UARTprintf("OK: LEDMatrix using Timer3A/B\r\n");
+
+    } else {
+        UARTprintf("Error: Timer3A/B already reserved\r\n");
+    }
+
+    vSDCardInit();
+
+    UARTprintf("OK: SD Card Initialized\r\n");
+
+    FIL xFileConfig; 
+
+    f_open(&xFileConfig, "config.txt", FA_READ);
+
+    UARTprintf("OK: Opened config.txt\n");
+
+    ROM_IntMasterEnable();
+
+    UARTprintf("OK: Interrupts Enabled\r\n");
+
+    UARTprintf("/////////////////////// MAIN LOOP ENTERED ////////////////////////////////////\r\n");
+
+    while(1)
+    {
+    }
+
+    UARTprintf("/////////////////////// MAIN LOOP EXITED /////////////////////////////////////\r\n");
 }

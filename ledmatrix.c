@@ -25,7 +25,7 @@ struct rgb24_t g_pxLEDMatrix[LEDMATRIX_AREA];
 // Private Functions
 //////////////////////////////////////////////////////////////////////////////
 
-static void inline vLEDMatrixPointPWM(uint8_t ucX, uint8_t ucY){
+static void vLEDMatrixPointPWM(uint8_t ucX, uint8_t ucY){
 
     GPIOPinTypeGPIOInput(GND_PORT, GND_PIN0 | GND_PIN1 | GND_PIN2 | GND_PIN3);
 
@@ -38,7 +38,7 @@ static void inline vLEDMatrixPointPWM(uint8_t ucX, uint8_t ucY){
 
 }
 
-static void inline vLEDMatrixSetColor(uint8_t* pucRGB){
+static void vLEDMatrixSetColor(uint8_t* pucRGB){
 
     RGBColorSet(pucRGB);
 }
@@ -61,7 +61,7 @@ void vLEDMatrixInit(void){
     RGBInit(1UL);
 }
 
-void inline vLEDMatrixSetPixelN(uint8_t ucNum, uint8_t* pucRGB){
+void vLEDMatrixSetPixelN(uint8_t ucNum, uint8_t* pucRGB){
     
     // assert(num < LEDMATRIX_AREA);
     // assert(rgb != NULL);
@@ -72,7 +72,7 @@ void inline vLEDMatrixSetPixelN(uint8_t ucNum, uint8_t* pucRGB){
 
 }
 
-void inline vLEDMatrixClearPixelN(uint8_t ucNum){
+void vLEDMatrixClearPixelN(uint8_t ucNum){
 
     // assert(num < LEDMATRIX_AREA);
     g_pxLEDMatrix[ucNum].red = 0;
@@ -80,7 +80,7 @@ void inline vLEDMatrixClearPixelN(uint8_t ucNum){
     g_pxLEDMatrix[ucNum].blue = 0;
 }
 
-void vLEDMatrixMultiplexer_Event(void){
+void vLEDMatrixMultiplexer_Hook(void){
 
     static volatile uint8_t ucPosition = 0x0;
 
@@ -91,17 +91,17 @@ void vLEDMatrixMultiplexer_Event(void){
     ucPosition = (ucPosition + 1) & (LEDMATRIX_AREA - 1);
 }
 
-void inline vLEDMatrixSetPixel(uint8_t ucX, uint8_t ucY, uint8_t* pucRGB){
+void vLEDMatrixSetPixel(uint8_t ucX, uint8_t ucY, uint8_t* pucRGB){
 
     vLEDMatrixSetPixelN(ucX + LEDMATRIX_SIZEY*ucY, pucRGB);
 }
 
-void inline vLEDMatrixClearPixel(uint8_t ucX, uint8_t ucY){
+void vLEDMatrixClearPixel(uint8_t ucX, uint8_t ucY){
 
     vLEDMatrixClearPixelN(ucX + LEDMATRIX_SIZEY*ucY );
 }
 
-void inline vLEDMatrixClearAll(void){
+void vLEDMatrixClearAll(void){
 
     for(uint8_t i = 0; i < LEDMATRIX_AREA; i++){
 

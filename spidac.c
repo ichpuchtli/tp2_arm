@@ -12,6 +12,7 @@
 
 #include "spidac.h"
 
+#include "talloc.h"
 
 void vSPIDACInit(void){
 
@@ -34,24 +35,6 @@ void vSPIDACInit(void){
             SSI_MODE_MASTER, SysCtlClockGet()/2, 16);
 
     SSIEnable(SSI3_BASE);
-
-    /******************************************************************************/
-    //Timer/Interrupt Configuration
-
-    // Calculate timer period from DACSPI_FREQ
-    uint32_t ulPeriod = SysCtlClockGet() / DACSPI_FREQ - 1;
-
-    // Configure Timer
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
-    TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER0_BASE, TIMER_A, ulPeriod);
-
-    // Configure Interrupt
-    IntEnable(INT_TIMER0A);
-    TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-
-    // Start Timer!
-    TimerEnable(TIMER0_BASE, TIMER_A);
 
 }
 
@@ -81,13 +64,4 @@ void vSPIDACWrite(uint16_t usData){
 
   while(SSIBusy(SSI3_BASE)) continue;
 
-}
-
-// DAC Update Interrupt Handler
-// Occurs every 1/DACSPI_FREQ seconds
-void vSPIDACIntHandler(void){
-
-    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
-    
-    (void) vSPIDACUpdate_Event();
 }

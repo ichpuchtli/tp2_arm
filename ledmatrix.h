@@ -14,7 +14,7 @@ struct rgb24_t {
 };
 
 void vLEDMatrixInit(void);
-void vLEDMatrixMultiplexer_Event(void);
+void vLEDMatrixMultiplexer_Hook(void);
 
 /* Left to Right From Bottom
  *
@@ -24,12 +24,12 @@ void vLEDMatrixMultiplexer_Event(void);
  *  0  X X X X 3
  *
  */
-void inline vLEDMatrixSetPixel(uint8_t x, uint8_t y, uint8_t* rgb);
-void inline vLEDMatrixSetPixelN(uint8_t num, uint8_t* rgb);
+void vLEDMatrixSetPixel(uint8_t x, uint8_t y, uint8_t* rgb);
+void vLEDMatrixSetPixelN(uint8_t num, uint8_t* rgb);
 
-void inline vLEDMatrixClearPixel(uint8_t x, uint8_t y);
-void inline vLEDMatrixClearPixelN(uint8_t num);
+void vLEDMatrixClearPixel(uint8_t x, uint8_t y);
+void vLEDMatrixClearPixelN(uint8_t num);
 
-void inline vLEDMatrixClearAll(void);
+void vLEDMatrixClearAll(void);
 
 #endif
