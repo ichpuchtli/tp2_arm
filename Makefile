@@ -65,6 +65,8 @@ ${COMPILER}:
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/${PROJECT}.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/timers.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/talloc.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/rgbledctrl.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/ledmatrix.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld
