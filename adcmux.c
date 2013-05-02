@@ -1,5 +1,20 @@
 #include "adcmux.h"
+
 #include "driverlib/adc.h"
+
+#define ADCMUX_NUM_SOURCES 8
+
+
+enum {
+
+    EFFECT_POT,
+    LFO_POT,
+
+};
+
+// Stores the latest value of each possible analog source
+static uint16_t g_psADCValueCache[ADCMUX_NUM_SOURCES];
+
 
 void vADCMuxInit(void){
 
@@ -51,15 +66,16 @@ void vADCMuxInit(void){
 
 }
 
-void vADCMuxSelect(uint8_t ucChannel){
+static void vADCMuxSelect(uint8_t ucChannel){
     g_ucADCMuxChannel = ucChannel;
 }
 
-void vADCMuxTrigger(void){
+static void vADCMuxTrigger(void){
 
     ADCProcessorTrigger(ADC0_BASE, 3);
 }
 
+// Synchronous ADC Read
 uint32_t ulADCMuxGetValue(void){
     
     //
@@ -82,4 +98,29 @@ uint32_t ulADCMuxGetValue(void){
     ADCSequenceDataGet(ADC0_BASE, 3, ulADC0_Value);
 
     return ulADC0_Value[0];
+}
+
+// Samler Hook, this function needs to tied a timer interrupt
+// the frequency of the timer interrupt is the update frequency
+// of a single value in the cache
+//
+// ---------------------------------------
+// | EFFECT_POT1 | LFO_POT | EFFECT_POT2 |
+// ---------------------------------------
+// |     128     |    38   |       0     |
+// ---------------------------------------
+//
+void vADCMuxSampler_Hook(void){
+
+    static uint8_t index = 0;
+
+    // Wait for ADC conversion then update the cache 
+    g_psADCValueCache[index] = (uint16_t) ulADCMuxGetValue();
+
+    // Advance array index
+    index = (index + 1) & (ADCMUX_NUM_SOURCES - 1);
+
+    // Select the next ADC source and trigger a conversion
+    vADCMuxSelect(index);
+    vADCMuxTrigger();
 }
