@@ -4,7 +4,6 @@
 
 #define ADCMUX_NUM_SOURCES 8
 
-
 enum {
 
     EFFECT_POT,
@@ -20,6 +19,8 @@ void vADCMuxInit(void){
 
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+
+    SysCtlADCSpeedSet(SYSCTL_ADCSPEED_250KPS);
 
     // TODO: change this to whichever GPIO port you are using.
     //
@@ -119,6 +120,8 @@ void vADCMuxSampler_Hook(void){
 
     // Advance array index
     index = (index + 1) & (ADCMUX_NUM_SOURCES - 1);
+
+    // TODO: Switch Mux Selectors
 
     // Select the next ADC source and trigger a conversion
     vADCMuxSelect(index);

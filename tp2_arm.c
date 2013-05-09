@@ -1,39 +1,15 @@
-#include "inc/hw_types.h" // tBoolean type
-#include "inc/hw_memmap.h" // GPIO_PORTA_BASE,...
-#include "driverlib/sysctl.h" // SYSCTL_*
-#include "driverlib/gpio.h" // GPIOPinConfigure,GPIO_PIN_3,....
+#include "inc/hw_types.h"
+#include "inc/hw_memmap.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/gpio.h"
+#include "driverlib/interrupt.h"
+#include "driverlib/timer.h"
+#include "driverlib/rom.h"
+#include "utils/uartstdio.h"
 
-//Timer Interrupts
-#include "inc/hw_ints.h" // NVIC interrupt assignment macros
-#include "driverlib/interrupt.h" // IntEnable, IntPrioritySet,...
-#include "driverlib/timer.h" // TimerConfigure, TimerLoadSet,...
-
-// Bottome Half Proccesing
-#include "taskq.h"
-
-// uint8_t, size_t, bool, etc...
-#include "stdtypes.h"
-
-// vSPIDACInit, vSPIDACWrite, vSPIDACUpdateRoutine
-#include "spidac.h"
-
+#include "timers.h"
+#include "talloc.h"
 #include "uartcomm.h"
-
-#include "systickctrl.h"
-
-// jakes stuff
-#include "usbmsctrl.h"
-#include "fatfs/src/diskio.h"
-
-#include "fatfs/src/ff.h"
-
-#include "sd.h"
-#include "usblib/usblib.h"
-#include "usbStructs.h"
-#include "processWav.h"
-
-#define DELAY_MS_(MS) SysCtlDelay(SysCtlClockGet()/(1000 * MS * 3))
-#define DELAY_US_(US) SysCtlDelay(SysCtlClockGet()/(US * 3))
 
 const uint16_t sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   1747, 1698, 1648, 1599, 1550, 1502, 1453, 1406, 1358, 1311, 1264, 1218,
@@ -56,45 +32,68 @@ const uint16_t sinetable[256] = {2048, 1998, 1948, 1897, 1847, 1797,
   3057, 3013, 2969, 2924, 2878, 2832, 2785, 2738, 2690, 2643, 2594, 2546,
   2497, 2448, 2398, 2349, 2299, 2249, 2199, 2148, 2098};
 
-
 int main(void) {
 
     // Setup the system clock to run at 50 Mhz from PLL with crystal reference
-    SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
+    ROM_SysCtlClockSet(SYSCTL_SYSDIV_4|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
                     SYSCTL_OSC_MAIN);
 
-    vSPIDACInit();
     vUARTCommInit();
+    vUARTCommMapStdio();
 
-    /* Initialize the SysTick interrupt with given period */
-    vSysTickCtrlInit(100 /*ms*/);
+    if( cTallocReserveTimer(TIMER2_BASE, TIMER_A) ){
+
+        //vTimersSplitPeriodic(TIMER2_BASE, TIMER_A, 1000000 / SPIDAC_FREQ);
+
+        //vTimersAddEventHook(TIMER2_BASE, TIMER_A, );
+
+        vTimersEnable(TIMER2_BASE, TIMER_A);
+
+        UARTprintf("OK: DAC using TIMER2A\r\n");
+
+    }else{
+        UARTprintf("Error: Timer2A already reserved\r\n");
+    }
 
 
-    IntMasterEnable(); // avr sei() equivalent
+    if( cTallocReserveTimer(TIMER2_BASE, TIMER_B) ){
+
+        vTimersSplitPeriodic(TIMER2_BASE, TIMER_B, 500);
+
+        //vTimersAddEventHook(TIMER2_BASE, TIMER_A, &);
+
+        vTimersEnable(TIMER2_BASE, TIMER_A);
+
+        UARTprintf("OK: KeyPad using TIMER2B\r\n");
+
+    }else {
+        UARTprintf("Error: Timer2B already reserved\r\n");
+    }
 
 
-    vUARTCommSendByte('\n');
-    vUARTCommSendStream("\r\n", 2);
-    vUARTCommSendString("Hello World!\r\n");
+    if( cTallocReserveTimer(TIMER3_BASE, TIMER_BOTH) ){
 
-/*
-    sd_create();
-//    sd_write("ok.txt", "bounce", 6);
-//    char *tempBuff;
-//    tempBuff = sd_ReadWav("jake.txt", 17, 67);
-//    sd_write("new.txt", tempBuff, 17);
-    USB_Create();
-    processWav_GetWavInfo("test.wav");
-*/
+        //vTimersFullWidthPeriodic(TIMER3_BASE, 1000000/(LEDMATRIX_AREA * 30));
+
+        //vTimersAddEventHook(TIMER3_BASE, TIMER_A, &vLEDMatrixMultiplexer_Hook);
+
+        vTimersEnable(TIMER3_BASE, TIMER_A);
+
+        UARTprintf("OK: LEDMatrix using Timer3A/B\r\n");
+
+    } else {
+        UARTprintf("Error: Timer3A/B already reserved\r\n");
+    }
+
+    ROM_IntMasterEnable();
+
+    UARTprintf("OK: Interrupts Enabled\r\n");
+
+    UARTprintf("/////////////////////// MAIN LOOP ENTERED ////////////////////////////////////\r\n");
 
     while(1)
     {
-        // if ( bTaskQTaskPending() )
-            vTaskQRun();
-        //else
-        //  SysCtlSleep()
-
-        SysCtlDelay(1000);
     }
-}
 
+    UARTprintf("/////////////////////// MAIN LOOP EXITED /////////////////////////////////////\r\n");
+}

@@ -40,8 +40,24 @@ static void IntDefaultHandler(void);
 // Forward declaration of the external interrupt handlers.
 //
 //*****************************************************************************
-extern void vSPIDACUpdateRoutine(void);
 extern void vUARTCommEchoIntHandler(void);
+// External declarations for the interrupt handlers used by the application.
+//
+//*****************************************************************************
+extern void vTimers0AIntHandler(void);
+extern void vTimers0BIntHandler(void);
+extern void vTimers1AIntHandler(void);
+extern void vTimers1BIntHandler(void);
+extern void vTimers2AIntHandler(void);
+extern void vTimers2BIntHandler(void);
+extern void vTimers3AIntHandler(void);
+extern void vTimers3BIntHandler(void);
+extern void vTimers4AIntHandler(void);
+extern void vTimers4BIntHandler(void);
+extern void vTimers5AIntHandler(void);
+extern void vTimers5BIntHandler(void);
+
+extern void vSysTick_Event(void);
 
 //*****************************************************************************
 //
@@ -55,7 +71,7 @@ extern int main(void);
 // Reserve space for the system stack.
 //
 //*****************************************************************************
-static unsigned long pulStack[64];
+static unsigned long pulStack[256];
 
 //*****************************************************************************
 //
@@ -82,7 +98,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
-    IntDefaultHandler,                      // The SysTick handler
+    vSysTick_Event,                         // The SysTick handler
     IntDefaultHandler,                      // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
@@ -102,12 +118,12 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // ADC Sequence 2
     IntDefaultHandler,                      // ADC Sequence 3
     IntDefaultHandler,                      // Watchdog timer
-    vSPIDACUpdateRoutine,                   // Timer 0 subtimer A
-    IntDefaultHandler,                      // Timer 0 subtimer B
-    IntDefaultHandler,                      // Timer 1 subtimer A
-    IntDefaultHandler,                      // Timer 1 subtimer B
-    IntDefaultHandler,                      // Timer 2 subtimer A
-    IntDefaultHandler,                      // Timer 2 subtimer B
+    vTimers0AIntHandler,                    // Timer 0 subtimer A
+    vTimers0BIntHandler,                    // Timer 0 subtimer B
+    vTimers1AIntHandler,                    // Timer 1 subtimer A
+    vTimers1BIntHandler,                    // Timer 1 subtimer B
+    vTimers2AIntHandler,                    // Timer 2 subtimer A
+    vTimers2BIntHandler,                    // Timer 2 subtimer B
     IntDefaultHandler,                      // Analog Comparator 0
     IntDefaultHandler,                      // Analog Comparator 1
     IntDefaultHandler,                      // Analog Comparator 2
@@ -118,8 +134,8 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port H
     IntDefaultHandler,                      // UART2 Rx and Tx
     IntDefaultHandler,                      // SSI1 Rx and Tx
-    IntDefaultHandler,                      // Timer 3 subtimer A
-    IntDefaultHandler,                      // Timer 3 subtimer B
+    vTimers3AIntHandler,                      // Timer 3 subtimer A
+    vTimers3BIntHandler,                      // Timer 3 subtimer B
     IntDefaultHandler,                      // I2C1 Master and Slave
     IntDefaultHandler,                      // Quadrature Encoder 1
     IntDefaultHandler,                      // CAN0
@@ -153,8 +169,8 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     IntDefaultHandler,                      // I2C2 Master and Slave
     IntDefaultHandler,                      // I2C3 Master and Slave
-    IntDefaultHandler,                      // Timer 4 subtimer A
-    IntDefaultHandler,                      // Timer 4 subtimer B
+    vTimers4AIntHandler,                      // Timer 4 subtimer A
+    vTimers4BIntHandler,                      // Timer 4 subtimer B
     0,                                      // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
@@ -175,8 +191,8 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
-    IntDefaultHandler,                      // Timer 5 subtimer A
-    IntDefaultHandler,                      // Timer 5 subtimer B
+    vTimers5AIntHandler,                      // Timer 5 subtimer A
+    vTimers5BIntHandler,                      // Timer 5 subtimer B
     IntDefaultHandler,                      // Wide Timer 0 subtimer A
     IntDefaultHandler,                      // Wide Timer 0 subtimer B
     IntDefaultHandler,                      // Wide Timer 1 subtimer A
@@ -281,8 +297,6 @@ ResetISR(void)
     // enabled).  Any configuration of the floating-point unit using DriverLib
     // APIs must be done here prior to the floating-point unit being enabled.
     //
-    // Note that this does not use DriverLib since it might not be included in
-    // this project.
     //
     HWREG(NVIC_CPAC) = ((HWREG(NVIC_CPAC) &
                          ~(NVIC_CPAC_CP10_M | NVIC_CPAC_CP11_M)) |

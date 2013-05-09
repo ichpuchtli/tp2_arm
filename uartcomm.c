@@ -6,31 +6,32 @@
 #include "driverlib/gpio.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/pin_map.h"
+#include "utils/uartstdio.h"
 
 #include "uartcomm.h"
 
-size_t ulStringLen(const uint8_t* pucString){
+size_t ulStringLen(char* pucString){
 
   size_t size = 0;
-
+  
   while(*pucString++) size++;
 
   return size;
 
 }
 
-void vUARTCommSendByte(const uint8_t ucByte){
+void vUARTCommSendByte(char ucByte){
 
   UARTCharPutNonBlocking(UART0_BASE, ucByte);
 }
 
-void vUARTCommSendStream(const uint8_t* pucBuffer, size_t ulCount){
+void vUARTCommSendStream(char* pucBuffer, size_t ulCount){
 
   while(ulCount--) 
     vUARTCommSendByte(*pucBuffer++);
 }
 
-void vUARTCommSendString(const uint8_t* pucString){
+void vUARTCommSendString(char* pucString){
 
   vUARTCommSendStream(pucString, ulStringLen(pucString));
 }
@@ -55,8 +56,24 @@ void vUARTCommInit(void){
 
 }
 
-void vUARTCommCLIIntHandler(void){}
-void vUARTCommRouterIntHandler(void){}
+void vUARTCommMapStdio(void){
+
+  UARTStdioConfig(0, UARTCOMM_BAUDRATE, SysCtlClockGet()); 
+}
+
+void vUARTCommIntHandler(void){
+
+    uint32_t ulStatus;
+
+    /* Get the interrrupt status. */
+    ulStatus = UARTIntStatus(UART0_BASE, true);
+
+    /* Clear the asserted interrupts. */
+    UARTIntClear(UART0_BASE, ulStatus);
+
+    (void) vUARTCommInt_Event();
+
+}
 
 void vUARTCommEchoIntHandler(void){
 

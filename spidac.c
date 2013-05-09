@@ -12,12 +12,18 @@
 
 #include "spidac.h"
 
+<<<<<<< HEAD
+=======
+#include "talloc.h"
+
+>>>>>>> bucket
 void vSPIDACInit(void){
 
     /******************************************************************************/
     // SPI Interface Configuration
 
     // Enable Peripheral Bus
+<<<<<<< HEAD
     SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI0);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
 
@@ -50,6 +56,23 @@ void vSPIDACInit(void){
 
     // Start Timer!
     TimerEnable(TIMER0_BASE, TIMER_A);
+=======
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_SSI3);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOD);
+
+    // Connect Pin Functionality
+    GPIOPinConfigure(GPIO_PD1_SSI3FSS);
+    GPIOPinConfigure(GPIO_PD0_SSI3CLK);
+    GPIOPinConfigure(GPIO_PD3_SSI3TX);
+
+    //Configure Pins for use by SSI Peripheral Bus
+    GPIOPinTypeSSI(GPIO_PORTD_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_3 );
+  
+    SSIConfigSetExpClk(SSI3_BASE, SysCtlClockGet(), SSI_FRF_MOTO_MODE_0,
+            SSI_MODE_MASTER, SysCtlClockGet()/2, 16);
+
+    SSIEnable(SSI3_BASE);
+>>>>>>> bucket
 
 }
 
@@ -75,6 +98,7 @@ void vSPIDACWrite(uint16_t usData){
   */
   uint16_t usCommand = (0 << 15) | (0 << 14) | (1 << 13) | (1 << 12);
 
+<<<<<<< HEAD
   SSIDataPut(SSI0_BASE, usCommand | (usData & 4095) );
 
   while(SSIBusy(SSI0_BASE)) continue;
@@ -90,5 +114,10 @@ void vSPIDACUpdateRoutine(void){
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
     
     //vSPIDACWrite(sinetable[i++ & 255]);
+=======
+  SSIDataPut(SSI3_BASE, usCommand | (usData & 4095) );
+
+  while(SSIBusy(SSI3_BASE)) continue;
+>>>>>>> bucket
 
 }
