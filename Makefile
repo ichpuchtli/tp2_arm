@@ -63,6 +63,17 @@ ${COMPILER}:
 # Rules for building.
 #
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/${PROJECT}.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/timers.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/talloc.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/rgbledctrl.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/ledmatrix.o
+${COMPILER}/${PROJECT}.axf: ${ROOT}/fatfs/src/ff.o
+${COMPILER}/${PROJECT}.axf: ${ROOT}/fatfs/port/mmc-ek-lm4f232h5qd.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/spidac.o
+${COMPILER}/${PROJECT}.axf: ${ROOT}/utils/uartstdio.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/uartcomm.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/sdcard.o
+${COMPILER}/${PROJECT}.axf: ${COMPILER}/keypad.o
 ${COMPILER}/${PROJECT}.axf: ${COMPILER}/startup_${COMPILER}.o
 ${COMPILER}/${PROJECT}.axf: ${ROOT}/driverlib/${COMPILER}-cm4f/libdriver-cm4f.a
 ${COMPILER}/${PROJECT}.axf: ${PROJECT}.ld
